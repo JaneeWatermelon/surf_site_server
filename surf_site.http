@@ -1,0 +1,6 @@
+@surf_site_HostAddress = http://localhost:5283
+
+GET {{surf_site_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
