@@ -5,8 +5,21 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularOrigins",
+    builder =>
+    {
+        builder.WithOrigins(
+                            "http://localhost:4200"
+                            )
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
+app.UseCors("AllowAngularOrigins");
 app.MapControllers();
 
 // Configure the HTTP request pipeline.
@@ -18,6 +31,3 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.Run();
-
-// using var dataContext = new DatabaseContext();
-// var posts = dataContext.Posts.ToList();

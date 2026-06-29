@@ -9,7 +9,7 @@ public class DatabaseContext: DbContext
 
     public DatabaseContext()
     {
-        Database.EnsureDeleted();
+        // Database.EnsureDeleted();
         Database.EnsureCreated();
 
         // var image1 = new Image
