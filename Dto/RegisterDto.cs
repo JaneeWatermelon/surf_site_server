@@ -10,7 +10,7 @@ public class RegisterDto: BaseEntityDto
     public string Password { get; set; }
     public string PasswordRepeat { get; set; }
 
-    public string? AvatarCode { get; set; }
+    public IFormFile? Avatar { get; set; }
 
     public string? SecondName { get; set; }
 

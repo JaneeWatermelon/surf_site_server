@@ -77,7 +77,7 @@ public class UserController : ControllerBase
 
     [HttpPost]
     [Route("api/Users/Register")]
-    public UserDto Register([FromBody] RegisterDto dto)
+    public async Task<UserDto> Register([FromForm] RegisterDto dto)
     {
         using var dataContext = new DatabaseContext();
 
@@ -95,7 +95,7 @@ public class UserController : ControllerBase
             Login = dto.Login,
             Email = dto.Email,
             Password = dto.Password,
-            AvatarCode = dto.AvatarCode,
+            // AvatarCode = dto.AvatarCode,
             SecondName = dto.SecondName,
             FirstName = dto.FirstName,
             ContactInfo = dto.ContactInfo,
@@ -103,6 +103,23 @@ public class UserController : ControllerBase
             Achivements = dto.Achivements,
             CreationDateTime = DateTime.UtcNow
         };
+
+        if (dto.Avatar != null)
+        {
+            var fileName = Guid.NewGuid() + Path.GetExtension(dto.Avatar.FileName);
+            var path = Path.Combine("media/images/users", fileName);
+
+            Directory.CreateDirectory("media/images/users");
+
+            await using var stream = System.IO.File.Create(path);
+            await dto.Avatar.CopyToAsync(stream);
+
+            user.AvatarCode = "media/images/users" + fileName;
+        } 
+        else
+        {
+            user.AvatarCode = "";
+        }
 
         dataContext.Users.Add(user);
         dataContext.SaveChanges();
