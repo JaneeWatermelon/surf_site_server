@@ -10,7 +10,7 @@ public class Post: BaseEntity
     public virtual User Author { get; set; }
 
     [Column(TypeName = "varchar(31)")]
-    public string Text { get; set; }
+    public string? Text { get; set; }
 
     public virtual List<ImagePostShip> ImagePostShips { get; set; }
 

@@ -21,17 +21,46 @@ public class PostController: ControllerBase
 
     [HttpPost]
     [Route("api/Posts/Create")]
-    public PostDto CreatePost([FromBody] PostDto dto)
+    public PostDto CreatePost([FromBody] CreatePostDto dto)
     {
+        if (string.IsNullOrWhiteSpace(dto.Text) &&
+            string.IsNullOrWhiteSpace(dto.Photo))
+        {
+            throw new Exception("Пост должен содержать текст или фотографию.");
+        }
+
         using var dataContext = new DatabaseContext();
+
+        var user = dataContext.Users.FirstOrDefault(u => u.Id == dto.AuthorId);
+
+        if (user == null)
+            throw new Exception("Пользователь не найден.");
+
+        var nowTime = DateTime.UtcNow;
 
         var post = new Post
         {
-            AuthorId = dto.AuthorId,
+            Author = user,
             Text = dto.Text,
-            CreationDateTime = DateTime.UtcNow,
-            LastModificationDateTime = DateTime.UtcNow
+            CreationDateTime = nowTime,
+            LastModificationDateTime = nowTime
         };
+        if (!string.IsNullOrWhiteSpace(dto.Photo)) {
+            var image = new Image
+            {
+                Code = dto.Photo,
+                CreationDateTime = nowTime,
+                LastModificationDateTime = nowTime
+            };
+            var imagePostShip = new ImagePostShip
+            {
+                Post = post,
+                Image = image
+            };
+            
+            dataContext.Images.Add(image);
+            dataContext.ImagePostShips.Add(imagePostShip);
+        }
 
         dataContext.Posts.Add(post);
         dataContext.SaveChanges();
