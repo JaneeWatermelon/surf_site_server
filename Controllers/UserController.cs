@@ -114,7 +114,7 @@ public class UserController : ControllerBase
             await using var stream = System.IO.File.Create(path);
             await dto.Avatar.CopyToAsync(stream);
 
-            user.AvatarCode = "media/images/users" + fileName;
+            user.AvatarCode = "media/images/users/" + fileName;
         } 
         else
         {
@@ -133,7 +133,10 @@ public class UserController : ControllerBase
     {
         using var dataContext = new DatabaseContext();
 
-        var user = dataContext.Users.FirstOrDefault(u => u.Login == dto.Login);
+        var user = dataContext.Users.FirstOrDefault(u => (
+            u.Login == dto.LoginOrEmail ||
+            u.Email == dto.LoginOrEmail
+        ));
 
         if (user == null)
             throw new Exception("Пользователь не найден.");

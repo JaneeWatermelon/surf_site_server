@@ -1,5 +1,5 @@
 public class LoginDto
 {
-    public string Login { get; set; }
+    public string LoginOrEmail { get; set; }
     public string Password { get; set; }
 }
