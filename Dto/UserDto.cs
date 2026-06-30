@@ -22,4 +22,6 @@ public class UserDto: BaseEntityDto
 
     public string? Achivements { get; set; }
 
+    public virtual List<Post>? Posts { get; set; }
+
 }
