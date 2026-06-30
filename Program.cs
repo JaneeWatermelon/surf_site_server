@@ -23,7 +23,8 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 app.UseCors("AllowAngularOrigins");
 app.MapControllers();
-app.UseStaticFiles();
+
+// app.UseStaticFiles();
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
