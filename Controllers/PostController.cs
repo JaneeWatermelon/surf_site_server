@@ -51,9 +51,8 @@ public class PostController: ControllerBase
     [Route("api/Posts/Create")]
     public async Task<PostWithImagesDto> CreatePost([FromForm] CreatePostDto dto)
     {
-        Console.WriteLine(dto);
         if (string.IsNullOrWhiteSpace(dto.Text) &&
-            dto.Image != null)
+            dto.Image == null)
         {
             throw new Exception("Пост должен содержать текст или фотографию.");
         }
