@@ -77,18 +77,57 @@ public class UserController : ControllerBase
 
     [HttpPost]
     [Route("api/Users/Register")]
-    public async Task<UserDto> Register([FromForm] RegisterDto dto)
+    public async Task<ActionResult<UserDto>> Register([FromForm] RegisterDto dto)
     {
         using var dataContext = new DatabaseContext();
+        var errors = new Dictionary<string, string[]>();
 
         if (dataContext.Users.Any(u => u.Login == dto.Login))
-            throw new Exception("Пользователь с таким псевдонимом уже существует.");
+        {
+            // throw new Exception("Пользователь с таким псевдонимом уже существует.");
+            errors["login"] =
+            [
+                "Пользователь с таким псевдонимом уже существует."
+            ];
+            return ValidationProblem(new ValidationProblemDetails
+            {
+                Errors = errors
+            });
+        }
 
         if (dataContext.Users.Any(u => u.Email == dto.Email))
-            throw new Exception("Пользователь с такой почтой уже существует.");
+        {
+            // throw new Exception("Пользователь с такой почтой уже существует.");
+            errors["email"] =
+            [
+                "Пользователь с такой почтой уже существует."
+            ];
+            return ValidationProblem(new ValidationProblemDetails
+            {
+                Errors = errors
+            });
+        }
 
         if (dto.Password != dto.PasswordRepeat)
-            throw new Exception("Пароли не совпадают.");
+        {
+            // throw new Exception("Пароли не совпадают.");
+            errors["passwordRepeat"] =
+            [
+                "Пароли не совпадают."
+            ];
+            return ValidationProblem(new ValidationProblemDetails
+            {
+                Errors = errors
+            });
+        }
+
+        if (errors.Count > 0)
+        {
+            return ValidationProblem(new ValidationProblemDetails
+            {
+                Errors = errors
+            });
+        }
 
         var user = new User
         {
@@ -130,9 +169,10 @@ public class UserController : ControllerBase
 
     [HttpPost]
     [Route("api/Users/Login")]
-    public UserDto Login([FromBody] LoginDto dto)
+    public ActionResult<UserDto> Login([FromBody] LoginDto dto)
     {
         using var dataContext = new DatabaseContext();
+        var errors = new Dictionary<string, string[]>();
 
         var user = dataContext.Users.FirstOrDefault(u => (
             u.Login == dto.LoginOrEmail ||
@@ -140,10 +180,38 @@ public class UserController : ControllerBase
         ));
 
         if (user == null)
-            throw new Exception("Пользователь не найден.");
+        {
+            // throw new Exception("Пользователь не найден.");
+            errors["login"] =
+            [
+                "Пользователь с таким псевдонимом уже существует."
+            ];
+            return ValidationProblem(new ValidationProblemDetails
+            {
+                Errors = errors
+            });
+        }
 
         if (user.Password != dto.Password)
-            throw new Exception("Неверный пароль.");
+        {
+            // throw new Exception("Неверный пароль.");
+            errors["password"] =
+            [
+                "Неверный пароль."
+            ];
+            return ValidationProblem(new ValidationProblemDetails
+            {
+                Errors = errors
+            });
+        }
+
+        if (errors.Count > 0)
+        {
+            return ValidationProblem(new ValidationProblemDetails
+            {
+                Errors = errors
+            });
+        }
 
         return GetUserById(user.Id)!;
     }
