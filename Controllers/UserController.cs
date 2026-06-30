@@ -106,15 +106,16 @@ public class UserController : ControllerBase
 
         if (dto.Avatar != null)
         {
+            var images_dir = "media/images/users";
             var fileName = Guid.NewGuid() + Path.GetExtension(dto.Avatar.FileName);
-            var path = Path.Combine("media/images/users", fileName);
+            var path = Path.Combine(images_dir, fileName);
 
-            Directory.CreateDirectory("media/images/users");
+            Directory.CreateDirectory(images_dir);
 
             await using var stream = System.IO.File.Create(path);
             await dto.Avatar.CopyToAsync(stream);
 
-            user.AvatarCode = "media/images/users/" + fileName;
+            user.AvatarCode = images_dir + "/" + fileName;
         } 
         else
         {

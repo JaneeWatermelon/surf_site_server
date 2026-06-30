@@ -1,3 +1,5 @@
+using Microsoft.Extensions.FileProviders;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -21,6 +23,19 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 app.UseCors("AllowAngularOrigins");
 app.MapControllers();
+app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "media", "images", "posts")),
+    RequestPath = "/media/images/posts"
+});
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "media", "images", "users")),
+    RequestPath = "/media/images/users"
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
