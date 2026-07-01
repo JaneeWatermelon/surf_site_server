@@ -10,6 +10,8 @@ public class PostController: ControllerBase
         using var dataContext = new DatabaseContext();
 
         return dataContext.Posts
+            .OrderByDescending(p => p.CreationDateTime)
+            .ThenByDescending(p => p.Id)
             .Select(p => new PostWithImagesDto
             {
                 Post = new PostDto
