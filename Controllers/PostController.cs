@@ -49,20 +49,47 @@ public class PostController: ControllerBase
 
     [HttpPost]
     [Route("api/Posts/Create")]
-    public async Task<PostWithImagesDto> CreatePost([FromForm] CreatePostDto dto)
+    public async Task<ActionResult<PostWithImagesDto>> CreatePost([FromForm] CreatePostDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.Text) &&
-            dto.Image == null)
-        {
-            throw new Exception("Пост должен содержать текст или фотографию.");
-        }
-
         using var dataContext = new DatabaseContext();
+        var errors = new Dictionary<string, string[]>();
 
         var user = dataContext.Users.FirstOrDefault(u => u.Id == dto.AuthorId);
 
         if (user == null)
-            throw new Exception("Пользователь не найден.");
+        {
+            // throw new Exception("Пользователь не найден.");
+            errors[""] =
+            [
+                "Пользователь не найден."
+            ];
+            return ValidationProblem(new ValidationProblemDetails
+            {
+                Errors = errors
+            });
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.Text) &&
+            dto.Image == null)
+        {
+            // throw new Exception("Пост должен содержать текст или фотографию.");
+            errors[""] =
+            [
+                "Пост должен содержать текст или фотографию."
+            ];
+            return ValidationProblem(new ValidationProblemDetails
+            {
+                Errors = errors
+            });
+        }
+
+        if (errors.Count > 0)
+        {
+            return ValidationProblem(new ValidationProblemDetails
+            {
+                Errors = errors
+            });
+        }
 
         var nowTime = DateTime.UtcNow;
 

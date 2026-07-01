@@ -182,9 +182,9 @@ public class UserController : ControllerBase
         if (user == null)
         {
             // throw new Exception("Пользователь не найден.");
-            errors["login"] =
+            errors["loginOrEmail"] =
             [
-                "Пользователь с таким псевдонимом уже существует."
+                "Пользователь не найден."
             ];
             return ValidationProblem(new ValidationProblemDetails
             {
