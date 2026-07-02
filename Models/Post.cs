@@ -9,7 +9,7 @@ public class Post: BaseEntity
     [ForeignKey(nameof(AuthorId))]
     public virtual User Author { get; set; }
 
-    [Column(TypeName = "varchar(31)")]
+    [Column(TypeName = "varchar(4095)")]
     public string? Text { get; set; }
 
     public virtual List<ImagePostShip> ImagePostShips { get; set; }

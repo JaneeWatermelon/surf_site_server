@@ -87,7 +87,7 @@ public class UserController : ControllerBase
             // throw new Exception("Пользователь с таким псевдонимом уже существует.");
             errors["login"] =
             [
-                "Пользователь с таким псевдонимом уже существует."
+                "Такой псевдоним уже занят."
             ];
             return ValidationProblem(new ValidationProblemDetails
             {
@@ -100,7 +100,7 @@ public class UserController : ControllerBase
             // throw new Exception("Пользователь с такой почтой уже существует.");
             errors["email"] =
             [
-                "Пользователь с такой почтой уже существует."
+                "Такая почта уже зарегистрирована."
             ];
             return ValidationProblem(new ValidationProblemDetails
             {
@@ -184,7 +184,7 @@ public class UserController : ControllerBase
             // throw new Exception("Пользователь не найден.");
             errors["loginOrEmail"] =
             [
-                "Пользователь не найден."
+                "Пользователя с такими данными не существует."
             ];
             return ValidationProblem(new ValidationProblemDetails
             {
