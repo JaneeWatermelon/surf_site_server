@@ -121,14 +121,6 @@ public class UserController : ControllerBase
             });
         }
 
-        if (errors.Count > 0)
-        {
-            return ValidationProblem(new ValidationProblemDetails
-            {
-                Errors = errors
-            });
-        }
-
         var user = new User
         {
             Login = dto.Login,
@@ -146,7 +138,26 @@ public class UserController : ControllerBase
         if (dto.Avatar != null)
         {
             var images_dir = "media/images/users";
-            var fileName = Guid.NewGuid() + Path.GetExtension(dto.Avatar.FileName);
+            var fileExt = Path.GetExtension(dto.Avatar.FileName);
+            var fileName = Guid.NewGuid() + fileExt;
+
+            var allowed = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+
+            var extension = fileExt.ToLowerInvariant();
+
+            if (!allowed.Contains(extension))
+            {
+                // return BadRequest("Недопустимый формат файла.");
+                errors["avatar"] =
+                [
+                    "Недопустимый формат файла."
+                ];
+                return ValidationProblem(new ValidationProblemDetails
+                {
+                    Errors = errors
+                });
+            }
+            
             var path = Path.Combine(images_dir, fileName);
 
             Directory.CreateDirectory(images_dir);
@@ -159,6 +170,14 @@ public class UserController : ControllerBase
         else
         {
             user.AvatarCode = "";
+        }
+
+        if (errors.Count > 0)
+        {
+            return ValidationProblem(new ValidationProblemDetails
+            {
+                Errors = errors
+            });
         }
 
         dataContext.Users.Add(user);

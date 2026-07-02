@@ -107,7 +107,26 @@ public class PostController: ControllerBase
 
         if (dto.Image != null) {
             var images_dir = "media/images/posts";
-            var fileName = Guid.NewGuid() + Path.GetExtension(dto.Image.FileName);
+            var fileExt = Path.GetExtension(dto.Image.FileName);
+            var fileName = Guid.NewGuid() + fileExt;
+
+            var allowed = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+
+            var extension = fileExt.ToLowerInvariant();
+
+            if (!allowed.Contains(extension))
+            {
+                // return BadRequest("Недопустимый формат файла.");
+                errors["image"] =
+                [
+                    "Недопустимый формат файла."
+                ];
+                return ValidationProblem(new ValidationProblemDetails
+                {
+                    Errors = errors
+                });
+            }
+
             var path = Path.Combine(images_dir, fileName);
 
             Directory.CreateDirectory(images_dir);
