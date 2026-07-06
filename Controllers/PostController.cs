@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
@@ -17,21 +18,7 @@ public class PostController: ControllerBase
                 Post = new PostDto
                 {
                     Id = p.Id,
-                    Author = new UserDto
-                    {
-                        Id = p.Author.Id,
-                        Login = p.Author.Login,
-                        Email = p.Author.Email,
-                        Password = p.Author.Password,
-                        AvatarCode = p.Author.AvatarCode,
-                        SecondName = p.Author.SecondName,
-                        FirstName = p.Author.FirstName,
-                        ContactInfo = p.Author.ContactInfo,
-                        About = p.Author.About,
-                        Achivements = p.Author.Achivements,
-                        CreationDateTime = p.Author.CreationDateTime,
-                        LastModificationDateTime = p.Author.LastModificationDateTime
-                    },
+                    Author = new UserDto(p.Author),
                     Text = p.Text,
                     CreationDateTime = p.CreationDateTime,
                     LastModificationDateTime = p.LastModificationDateTime
@@ -49,6 +36,7 @@ public class PostController: ControllerBase
             .ToList();
     }
 
+    [Authorize]
     [HttpPost]
     [Route("api/Posts/Create")]
     public async Task<ActionResult<PostWithImagesDto>> CreatePost([FromForm] CreatePostDto dto)
@@ -57,6 +45,24 @@ public class PostController: ControllerBase
         var errors = new Dictionary<string, string[]>();
 
         var user = dataContext.Users.FirstOrDefault(u => u.Id == dto.AuthorId);
+        // var user = dataContext.Users
+        // .Where(u => u.Id == dto.AuthorId)
+        // .Select(u => new UserDto
+        // {
+        //     Id = u.Id,
+        //     Login = u.Login,
+        //     Email = u.Email,
+        //     Password = u.Password,
+        //     AvatarCode = u.AvatarCode,
+        //     SecondName = u.SecondName,
+        //     FirstName = u.FirstName,
+        //     ContactInfo = u.ContactInfo,
+        //     About = u.About,
+        //     Achivements = u.Achivements,
+        //     CreationDateTime = u.CreationDateTime,
+        //     LastModificationDateTime = u.LastModificationDateTime
+        // })
+        // .FirstOrDefault();
 
         if (user == null)
         {
@@ -159,21 +165,7 @@ public class PostController: ControllerBase
         {
             Post = new PostDto {
                 Id = post.Id,
-                Author = new UserDto
-                {
-                    Id = post.Author.Id,
-                    Login = post.Author.Login,
-                    Email = post.Author.Email,
-                    Password = post.Author.Password,
-                    AvatarCode = post.Author.AvatarCode,
-                    SecondName = post.Author.SecondName,
-                    FirstName = post.Author.FirstName,
-                    ContactInfo = post.Author.ContactInfo,
-                    About = post.Author.About,
-                    Achivements = post.Author.Achivements,
-                    CreationDateTime = post.Author.CreationDateTime,
-                    LastModificationDateTime = post.Author.LastModificationDateTime
-                },
+                Author = new UserDto(post.Author),
                 Text = post.Text,
                 CreationDateTime = post.CreationDateTime,
                 LastModificationDateTime = post.LastModificationDateTime

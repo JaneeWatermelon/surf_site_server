@@ -1,6 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+
 [ApiController]
 public class UserController : ControllerBase
 {
@@ -27,21 +34,22 @@ public class UserController : ControllerBase
         dataContext.Users.Add(user);
         dataContext.SaveChanges();
 
-        return new UserDto
-        {
-            Id = user.Id,
-            Login = user.Login,
-            Email = user.Email,
-            Password = user.Password,
-            AvatarCode = user.AvatarCode,
-            SecondName = user.SecondName,
-            FirstName = user.FirstName,
-            ContactInfo = user.ContactInfo,
-            About = user.About,
-            Achivements = user.Achivements,
-            CreationDateTime = user.CreationDateTime,
-            LastModificationDateTime = user.LastModificationDateTime,
-        };
+        return new UserDto(user);
+        // return new UserDto
+        // {
+        //     Id = user.Id,
+        //     Login = user.Login,
+        //     Email = user.Email,
+        //     Password = user.Password,
+        //     AvatarCode = user.AvatarCode,
+        //     SecondName = user.SecondName,
+        //     FirstName = user.FirstName,
+        //     ContactInfo = user.ContactInfo,
+        //     About = user.About,
+        //     Achivements = user.Achivements,
+        //     CreationDateTime = user.CreationDateTime,
+        //     LastModificationDateTime = user.LastModificationDateTime,
+        // };
     }
 
     [HttpGet]
@@ -52,21 +60,22 @@ public class UserController : ControllerBase
 
         var user = dataContext.Users
             .Where(u => u.Id == id)
-            .Select(u => new UserDto
-            {
-                Id = u.Id,
-                Login = u.Login,
-                Email = u.Email,
-                Password = u.Password,
-                AvatarCode = u.AvatarCode,
-                SecondName = u.SecondName,
-                FirstName = u.FirstName,
-                ContactInfo = u.ContactInfo,
-                About = u.About,
-                Achivements = u.Achivements,
-                CreationDateTime = u.CreationDateTime,
-                LastModificationDateTime = u.LastModificationDateTime,
-            })
+            .Select(u => new UserDto(u))
+            // .Select(u => new UserDto
+            // {
+            //     Id = u.Id,
+            //     Login = u.Login,
+            //     Email = u.Email,
+            //     Password = u.Password,
+            //     AvatarCode = u.AvatarCode,
+            //     SecondName = u.SecondName,
+            //     FirstName = u.FirstName,
+            //     ContactInfo = u.ContactInfo,
+            //     About = u.About,
+            //     Achivements = u.Achivements,
+            //     CreationDateTime = u.CreationDateTime,
+            //     LastModificationDateTime = u.LastModificationDateTime,
+            // })
             .FirstOrDefault();
 
         if (user == null)
@@ -188,7 +197,7 @@ public class UserController : ControllerBase
 
     [HttpPost]
     [Route("api/Users/Login")]
-    public ActionResult<UserDto> Login([FromBody] LoginDto dto)
+    public ActionResult<LoginOutDto> Login([FromBody] LoginDto dto)
     {
         using var dataContext = new DatabaseContext();
         var errors = new Dictionary<string, string[]>();
@@ -232,6 +241,37 @@ public class UserController : ControllerBase
             });
         }
 
-        return GetUserById(user.Id)!;
+        var token = GenerateJwtToken(user);
+    
+        // формируем ответ
+        var response = new LoginOutDto
+        {
+            Access_token = token,
+            User = GetUserById(user.Id)!
+        };
+    
+        return response;
+
+        // return GetUserById(user.Id)!;
+    }
+
+    private string GenerateJwtToken(User user)
+    {
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.Login),
+            new Claim(ClaimTypes.Email, user.Email)
+        };
+
+        var jwt = new JwtSecurityToken(
+                issuer: AuthOptions.ISSUER,
+                audience: AuthOptions.AUDIENCE,
+                claims: claims,
+                expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(1)),
+                signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+        var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
+
+        return encodedJwt;
     }
 }
